@@ -1,8 +1,10 @@
 <template>
-  <div class="wrapper w-full min-h-screen bg-[#F2FFF5]">
+  <div :class="`wrapper w-full min-h-screen`">
     <div class="container mx-auto grid place-items-center h-screen">
       <div class="timer">
-        <div
+        <Status :statusInfo="statusInfo" />
+
+        <!-- <div
           v-if="status.isPomodoro"
           class="status py-[10px] px-[16px] flex items-center justify-center gap-5 rounded-full border-2 bg-[#FF4C4C26] border-[#471515] text-[#471515]"
         >
@@ -30,28 +32,24 @@
 
           <span>Long Break</span>
           <span>{{ focusPomodoros.total }}</span>
-        </div>
+        </div> -->
 
-        <div class="numbers select-none">
+        <div :class="`numbers select-none`">
           <h1>{{ minute < 10 ? '0' : '' }}{{ minute }}</h1>
           <h1>{{ second < 10 ? '0' : '' }}{{ second }}</h1>
         </div>
 
-        <div class="controls flex gap-3 text-4xl">
-          <button class="p-6 bg-[rgba(77,218,110,0.15)] rounded-3xl">
+        <div :class="`controls flex gap-3 text-4xl`">
+          <button :class="`p-6 rounded-3xl`">
             <i class="bx bx-dots-horizontal-rounded"></i>
           </button>
 
-          <button
-            @click="control"
-            :disabled="isStopped"
-            class="p-6 bg-[rgba(77,218,110,0.15)] rounded-3xl"
-          >
+          <button @click="control" :disabled="isStopped" :class="`p-6 rounded-3xl`">
             <i v-if="!isRunning" class="bx bx-play"></i>
             <i v-else class="bx bx-pause"></i>
           </button>
 
-          <button @click="next" class="p-6 bg-[rgba(77,218,110,0.15)] rounded-3xl">
+          <button @click="next" :class="`p-6 rounded-3xl`">
             <i class="bx bx-skip-next"></i>
           </button>
         </div>
@@ -61,7 +59,7 @@
 </template>
 
 <script setup>
-import Icons from './components/Icons.vue'
+import Status from './components/Status.vue'
 import { ref, reactive, computed, onMounted } from 'vue'
 
 const focusPomodoros = reactive({
@@ -74,6 +72,40 @@ const status = reactive({
   isShortBreak: false,
   isLongBreak: false
 })
+
+const statusInfo = computed(() => {
+  if (status.isPomodoro) {
+    return {
+      color: '#471515',
+      bg_color: '#FF4C4C26',
+      icon_name: 'status-brain',
+      text: 'Focus',
+      count: focusPomodoros.total
+    }
+  } else if (status.isShortBreak) {
+    return {
+      color: '#14401d',
+      bg_color: '#4DDA6E26',
+      icon_name: 'status-coffee',
+      text: 'Short Break',
+      count: focusPomodoros.total
+    }
+  } else if (status.isLongBreak) {
+    return {
+      color: '#153047',
+      bg_color: '#4CACFF26',
+      icon_name: 'status-coffee',
+      text: 'Long Break',
+      count: focusPomodoros.total
+    }
+  }
+})
+
+const color = ref('#471515')
+const bg_color = ref('#FFF2F2')
+const btn_color = ref('#FF4C4C26')
+const btn_hover = ref('#FF4C4CB5')
+const btn_active = ref('#FF4C4CB5')
 
 const pomodoroLength = reactive({
   minute: 25,
@@ -141,17 +173,32 @@ const next = () => {
       minute.value = shortBreakLength.minute
       second.value = shortBreakLength.second
       status.isShortBreak = true
+      color.value = '#14401D'
+      bg_color.value = '#F2FFF5'
+      btn_color.value = '#4DDA6E26'
+      btn_hover.value = '#4DDA6E9E'
+      btn_active.value = '#4DDA6E9E'
       status.isPomodoro = false
     } else {
       minute.value = longBreakLength.minute
       second.value = longBreakLength.second
       status.isLongBreak = true
+      color.value = '#153047'
+      bg_color.value = '#F2F9FF'
+      btn_color.value = '#4CACFF26'
+      btn_hover.value = '#4CACFF9E'
+      btn_active.value = '#4CACFF9E'
       status.isPomodoro = false
     }
   } else {
     minute.value = pomodoroLength.minute
     second.value = pomodoroLength.second
     status.isPomodoro = true
+    color.value = '#471515'
+    bg_color.value = '#FFF2F2'
+    btn_color.value = '#FF4C4C26'
+    btn_hover.value = '#FF4C4CB5'
+    btn_active.value = '#FF4C4CB5'
     status.isShortBreak = false
     status.isLongBreak = false
   }
@@ -170,6 +217,11 @@ onMounted(() => {})
 </script>
 
 <style lang="scss" scoped>
+.wrapper {
+  color: v-bind(color);
+  background: v-bind(bg_color);
+}
+
 .timer {
   display: flex;
   flex-direction: column;
@@ -184,20 +236,20 @@ onMounted(() => {})
 }
 
 .controls button {
+  background: v-bind(btn_color);
   transition: all 0.3s ease;
 }
 
-.controls button:focus {
-  padding: 32px 48px;
-  background: rgba(77, 218, 110, 0.62);
+.controls button:hover {
+  background: v-bind(btn_hover);
 }
 
-.controls button:hover {
-  background: #86e299;
+.controls button:focus {
+  background: v-bind(btn_active);
+  padding: 32px 48px;
 }
 
 .numbers {
-  color: #14401d;
   font-weight: 800;
   font-size: 256px;
   line-height: 85%;
